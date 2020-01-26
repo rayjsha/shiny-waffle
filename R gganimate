@@ -1,0 +1,31 @@
+
+
+###When I try to display it I have two issues: 1) It display the years not as integer but ex.2017.5 2018 2018.5 etc.. 
+### 2) When I run the code on windows it works but on mac it just save frame photo JPG.
+
+
+WDI(country = "all", indicator = c("SP.DYN.TFRT.IN","SP.POP.TOTL","SP.DYN.LE00.IN"), start = 1960, end = 2018, extra = FALSE, cache = NULL) %>%
+  #We rename the indicators for easier quote
+  rename("TFRT"="SP.DYN.TFRT.IN", "pop"="SP.POP.TOTL", "lifexp"="SP.DYN.LE00.IN") %>%
+  #We exclude regions and aggregates of countries, which are identifiable as they have a digit in the ISO2C code
+  filter(!str_detect(iso2c,"[:digit:]")) %>%
+  #Now we design our plot using ggplot2: we give it the aesthetics (aes), as the data is already in thanks to the pipe %>%
+  ggplot(aes(x=TFRT,y=lifexp,size=pop,color=country,fill=country))+
+  #Here we tell ggplot to give us plot
+  geom_point(show.legend = FALSE)+
+  #Here we include the text for the year
+  geom_text(aes(label=year,x=2,y=30), size=10, color="black")+
+  #Here we label the axis
+  labs(x="Total fertility rate",y="Life Expectancy", title = "Increased life expectancy may mean lower fertility?",
+       subtitle = "Life expectancy Vs Fertility rate worlwide 1960-2018",
+       caption = "Data source: World Development Indicators 2019 - http://datatopics.worldbank.org/world-development-indicators/")+
+  theme_classic()+
+  theme(
+    plot.title = element_text(color = "black", size = 12, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(color = "black",hjust = 0.5),
+    plot.caption = element_text(color = "black", face = "italic", hjust = 1)
+  )+
+  #Here we introduce our animation parameters
+  transition_time(year)+
+  ease_aes("linear")+
+  shadow_mark(color="gray80", size=0.8)
